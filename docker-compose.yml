@@ -24,7 +24,7 @@ services:
       PGADMIN_DEFAULT_PASSWORD: admin
       PGADMIN_LISTEN_PORT: 5050
     volumes:
-      - ./docker/postgres/servers.json:/pgadmin4/servers.json
+      - ./docker/pgadmin/servers.json:/pgadmin4/servers.json
     depends_on:
       postgres:
         condition: service_healthy
