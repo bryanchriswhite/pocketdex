@@ -1,0 +1,16 @@
+# root and vendor modules
+node_modules
+*/**/node_modules
+
+# generated code
+dist
+src/types
+
+# not needed
+docs
+.run
+.github
+*.md
+*/**/.md
+*/**/.png
+*/**/.jpg

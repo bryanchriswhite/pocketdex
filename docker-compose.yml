@@ -15,6 +15,22 @@ services:
       timeout: 5s
       retries: 5
 
+  pgadmin:
+    image: dpage/pgadmin4:8.8
+    container_name: pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@local.dev
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_LISTEN_PORT: 5050
+    volumes:
+      - ./docker/postgres/servers.json:/pgadmin4/servers.json
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - 5050:5050
+
 # Note: The proxy service is only necessary if you are running a Shannon
 # localnet and are unable to use the docker network in bridge mode.
 # To use the proxy service you must run the following command on the host
