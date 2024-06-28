@@ -33,6 +33,11 @@ if [ "$WATCH" = "true" ]
 then
   # call the first command if WATCH is true
   echo "WATCH is true. Running the application with nodemon..."
+  if [ "$NODE_ENV" = "production" ]
+  then
+      # Add commands to do something here
+      echo "WARN: Hot-reload is not recommended in production. Unset $WATCH to disable it."
+  fi
   rm -rf /dist
   update_project
   env yarn exec nodemon --config nodemon.json --exec "NODE_ENV=$NODE_ENV yarn run build && NODE_ENV=$NODE_ENV node /vendor/subql-cosmos/packages/node/bin/run $@"

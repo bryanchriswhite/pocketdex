@@ -8,6 +8,7 @@ RUN npm i -g typescript
 
 WORKDIR /app
 
+# TODO_MAINNET(@jorgecuesta): Do a better use of copy to prevent copy everything which trigger a full build everytime.
 # Copy files
 COPY . /app
 
@@ -18,8 +19,7 @@ RUN yarn install # --frozen-lockfile
 RUN yarn run vendor:clean
 RUN yarn run vendor:setup
 
-# Build pocketdex
-RUN #NODE_ENV=$NODE_ENV yarn run codegen
+# Run codegen and Build pocketdex
 RUN NODE_ENV=$NODE_ENV yarn run build
 
 FROM node:22-alpine as runner
@@ -27,6 +27,8 @@ FROM node:22-alpine as runner
 # Add system dependencies
 RUN apk update
 RUN apk add git postgresql14-client tini curl
+
+# TODO_MAINNET(@jorgecuesta): Add user and group instead of work with root to follow best practices.
 
 # add extra tools that are required
 ADD https://github.com/mikefarah/yq/releases/download/v4.26.1/yq_linux_amd64 /usr/local/bin/yq
