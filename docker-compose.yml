@@ -53,6 +53,12 @@ services:
     build:
       context: .
       dockerfile: ./docker/node.dockerfile
+      args:
+        # NOTE: this only applies when WATCH is not true on environment variables
+        # allow switching between dotenv file
+        # set nothing or comment to use .env or set develop to use .env.develop
+        # you can create your own .env.<something> and specify <something> as NODE_ENV value.
+        NODE_ENV:
     depends_on:
       "postgres":
         condition: service_healthy
@@ -63,13 +69,20 @@ services:
       DB_DATABASE: postgres
       DB_HOST: postgres
       DB_PORT: 5432
+      START_BLOCK: 1
+      # anything that is not "true" will avoid start nodemon
+      WATCH: true
+      # this will manage which dotenv file will be used on every reload
+      NODE_ENV: develop
     volumes:
       - ./:/app
+      - ignore_dist:/app/dist
+      - ignore_types:/app/src/types
     command:
       - ${SUB_COMMAND:-} # set SUB_COMMAND env variable to "test" to run tests
       - -f=/app
       - --db-schema=app
-      - --workers=4
+      - --workers=1
       - --batch-size=30
       - --unfinalized-blocks=true
     healthcheck:
@@ -100,5 +113,7 @@ services:
       - --indexer=http://subquery-node:3000
 
 volumes:
+  ignore_dist: {}
+  ignore_types: {}
   postgres_data:
     driver: local
