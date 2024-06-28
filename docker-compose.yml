@@ -82,6 +82,9 @@ services:
       - ${SUB_COMMAND:-} # set SUB_COMMAND env variable to "test" to run tests
       - -f=/app
       - --db-schema=app
+      # for development purposes is better reduce the amount of worker due to the amount of logs that many
+      # workers will produce, so if you will or need to move faster you can safely increase this number to
+      # any number that match with the amount of CPUs
       - --workers=1
       - --batch-size=30
       - --unfinalized-blocks=true
