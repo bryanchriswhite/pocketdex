@@ -1,5 +1,5 @@
 {
-  "Servers": {
+  "DefaultServers": {
     "1": {
       "Name": "admin@local.dev",
       "Group": "Localnet",

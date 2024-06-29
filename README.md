@@ -28,13 +28,19 @@ yarn install
 
 ### 3. Generate types
 
-Types will need to be regenerated any time the graphql.schema is changed.
+Types will need to be regenerated any time the `graphql.schema` is changed.
 
 ```shell
 yarn run codegen
 ```
 
 ### 4. Run
+
+Create a copy of `.env.sample` as `.env` which is required on the following commands.
+You can modify `.env` as you wish.
+```shell
+cp .env.sample .env
+```
 
 Build & start:
 ```shell
@@ -49,7 +55,7 @@ yarn run docker:build
 yarn run docker:start
 ```
 
-Stop (without delete data)
+Stop (without deleted data)
 ```shell
 yarn run docker:stop
 ```
@@ -117,7 +123,7 @@ yarn db:dump:schema -- -t blocks -t messages
 ##### When `pg_dump` is insufficient
 
 In some cases, `pg_dump` may not export a relevant DB object; for example, enums.
-In these cases it is necessary to manually extract the relevant data from the DB and incorporate it into the initial_schema.sql file.
+In these cases, it is necessary to manually extract the relevant data from the DB and incorporate it into the initial_schema.sql file.
 
 In the case of **enums**, the following queries expose the relevant records, the results from which can be re-written as a COPY or INSERT statements into the respective tables from which they came:
 
