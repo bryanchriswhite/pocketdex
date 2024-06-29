@@ -92,11 +92,11 @@ services:
       # this will manage which dotenv file will be used on every reload
     volumes:
       # Replaced ./:/app with individual tracked files to avoid the generated code go outside the container
-      - ./schema.graphql:/app/schema.graphql
-      - ./project.ts:/app/project.ts
-      - ./proto:/app/proto
-      - ./src:/app/src
-      - ignore_types:/app/src/types
+      - ./schema.graphql:/home/app/schema.graphql
+      - ./project.ts:/home/app/project.ts
+      - ./proto:/home/app/proto
+      - ./src:/home/app/src
+      - ignore_types:/home/app/src/types
     command:
       - ${SUB_COMMAND:-} # set SUB_COMMAND env variable to "test" to run tests
       - --unfinalized-blocks=true

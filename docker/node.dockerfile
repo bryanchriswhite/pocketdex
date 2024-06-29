@@ -39,8 +39,18 @@ RUN chmod +x scripts/prepare-docker-layers.sh && WATCH=$WATCH ./scripts/prepare-
 
 FROM node:22-alpine as runner
 
+# add group "app" and user "app"
+RUN addgroup -g 1001 app && adduser -D -h /home/app -u 1001 -G app app
+
 # Set arg and env on this layer again
+ARG NODE_ENV=production
+ARG ENDPOINT
+ARG CHAIN_ID=poktroll
 ARG WATCH=false
+
+ENV NODE_ENV=$NODE_ENV
+ENV ENDPOINT=$ENDPOINT
+ENV CHAIN_ID=$CHAIN_ID
 ENV WATCH=$WATCH
 
 # Add system dependencies
@@ -53,30 +63,37 @@ RUN apk add git postgresql14-client tini curl jq
 ADD https://github.com/mikefarah/yq/releases/download/v4.26.1/yq_linux_amd64 /usr/local/bin/yq
 RUN chmod +x /usr/local/bin/yq
 
-WORKDIR /app
+# Switch to user "app"
+WORKDIR /home/app
 
 # add the dependencies
-COPY ./package.json yarn.lock /app/
+COPY ./package.json yarn.lock /home/app/
 
 # include build artefacts in final image
-COPY --from=builder /app/dist /app/dist
-COPY --from=builder /app/vendor /vendor
-COPY --from=builder /app/project.yaml /app/
+COPY --from=builder /app/dist /home/app/dist
+COPY --from=builder /app/vendor /home/app/vendor
+COPY --from=builder /app/project.yaml /home/app/
 
 # copy files from source not from builder
 # NOTE: Docker documentation recommends the use of COPY for copying files and directories into an image because it's more transparent than ADD
-COPY ./proto /app/proto
-COPY ./scripts/build.sh ./scripts/shared.sh ./scripts/prepare-docker-layers.sh /app/scripts/
-COPY ./project.ts schema.graphql nodemon.json tsconfig.json /app/
-COPY ./scripts/node-entrypoint.sh /entrypoint.sh
+COPY ./proto /home/app/proto
+COPY ./scripts/shared.sh ./scripts/build.sh ./scripts/prepare-docker-layers.sh ./scripts/watch-exec.sh /home/app/scripts/
+COPY ./project.ts schema.graphql nodemon.json tsconfig.json /home/app/
+COPY ./scripts/node-entrypoint.sh /home/app/entrypoint.sh
 
 # TODO_MAINNET(@bryanchriswhite): Add the .gmrc once migrations are available.
 #COPY ./.gmrc /app/.gmrc
 
-RUN chmod +x /entrypoint.sh
-RUN find /app/scripts -type f -name "*.sh" -exec chmod +x {} \;
+RUN chown app:app /home/app/entrypoint.sh && chmod +x /home/app/entrypoint.sh
+RUN find /home/app/scripts -type f -name "*.sh" -exec chmod +x {} \;
 
 # install production only or dev depending if WATCH is true
 RUN WATCH=$WATCH ./scripts/prepare-docker-layers.sh "runner"
 
-ENTRYPOINT ["/sbin/tini", "--", "/entrypoint.sh"]
+RUN mkdir -p /home/app/src/types && chown -R app:app /home/app/src/types
+
+# this will be change inside of entrypoint.sh to been able to chown -R app:app the types mounted volume
+# so the commands are finally running with app user
+USER root
+
+ENTRYPOINT ["/sbin/tini", "--", "/home/app/entrypoint.sh"]
